@@ -131,6 +131,16 @@ public class SwerveModule {
     return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
 
+  private double getDrivePosition() {
+    double ticks = m_driveMotor.getSelectedSensorPosition();
+    double msToS = 100.0 * (1.0 / 1000.0);
+    double ticksToRevolutions = 1.0 / 2048.0;
+    double revolutionsMotorToRevolutionsWheel = DT_DRIVE_GEAR_RATIO // Reduction from motor to output
+    * (1 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
+
+    return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
+  }
+
   /**
    * Returns the current position of the module.
    *
@@ -139,10 +149,6 @@ public class SwerveModule {
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
         getDrivePosition(), getAngle());
-  }
-
-  private double getDrivePosition() {
-    return m_driveMotor.getSelectedSensorPosition();
   }
 
   private Rotation2d getAngle() {
