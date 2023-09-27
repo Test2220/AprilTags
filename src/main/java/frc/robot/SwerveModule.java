@@ -133,12 +133,11 @@ public class SwerveModule {
 
   private double getDrivePosition() {
     double ticks = m_driveMotor.getSelectedSensorPosition();
-    double msToS = 100.0 * (1.0 / 1000.0);
     double ticksToRevolutions = 1.0 / 2048.0;
     double revolutionsMotorToRevolutionsWheel = DT_DRIVE_GEAR_RATIO // Reduction from motor to output
     * (1 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
 
-    return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
+    return ticks * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
 
   /**
