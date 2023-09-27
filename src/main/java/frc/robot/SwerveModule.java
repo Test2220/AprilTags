@@ -32,6 +32,36 @@ public class SwerveModule {
 
   private final PWMEncoder m_turningEncoder;
 
+  public static final double DT_WHEEL_DIAMETER = 0.10033;
+
+  // Drive gear ratio
+  public static final double DT_DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+  // Drive motor inverted
+  public static final boolean DT_DRIVE_MOTOR_INVERTED = true;
+
+  // Steer gear ratio
+  public static final double DT_STEER_GEAR_RATIO = 150.0 / 7.0;
+  // Steer motor inverted
+  public static final boolean DT_STEER_MOTOR_INVERTED = false;
+
+  // Steer encoder gear ratio
+  public static final double DT_STEER_ENCODER_GEAR_RATIO = 1;
+  // Steer encoder inverted
+  public static final boolean DT_STEER_ENCODER_INVERTED = false;
+
+  // Steer CANcoder offset front left
+  public static final double DT_FL_SE_OFFSET = 277;
+
+  // Steer CANcoder offset front right
+  public static final double DT_FR_SE_OFFSET = 124;
+
+  // Steer CANcoder offset back left
+  public static final double DT_BL_SE_OFFSET = 5;
+
+  // Steer CANcoder offset back right
+  public static final double DT_BR_SE_OFFSET = 248;
+
+
   // Gains are for example purposes only - must be determined for your own robot!
   private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
 
@@ -88,7 +118,17 @@ public class SwerveModule {
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(
-        m_driveEncoder.getRate(), getAngle());
+        getDriveVelocity(), getAngle());
+  }
+
+  private double getDriveVelocity() {
+    double ticks = m_driveMotor.getSelectedSensorVelocity();
+    double msToS = 100.0 * (1.0 / 1000.0);
+    double ticksToRevolutions = 1.0 / 2048.0;
+    double revolutionsMotorToRevolutionsWheel = DT_DRIVE_GEAR_RATIO // Reduction from motor to output
+    * (1 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
+
+    return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
 
   /**
@@ -98,7 +138,11 @@ public class SwerveModule {
    */
   public SwerveModulePosition getPosition() {
     return new SwerveModulePosition(
-        m_driveEncoder.getDistance(), getAngle());
+        getDrivePosition(), getAngle());
+  }
+
+  private double getDrivePosition() {
+    return m_driveMotor.getSelectedSensorPosition();
   }
 
   private Rotation2d getAngle() {
