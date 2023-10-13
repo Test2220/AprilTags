@@ -4,25 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import frc.robot.subsystems.DriveTrain;
 
 public class SwerveModule {
-  
-  private static final double kWheelRadius = 0.0508;
-  private static final int kEncoderResolution = 4096;
-
   private static final double kModuleMaxAngularVelocity = DriveTrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
@@ -60,23 +50,6 @@ public class SwerveModule {
 
   // Steer CANcoder offset back right
   public static final double DT_BR_SE_OFFSET = 248;
-
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final ProfiledPIDController m_turningPIDController =
-      new ProfiledPIDController(
-          1,
-          0,
-          0,
-          new TrapezoidProfile.Constraints(
-              kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration));
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
@@ -140,6 +113,14 @@ public class SwerveModule {
     return ticks * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
 
+  private double mpsToEncoderTicks(double mps) {
+    double sToMs = mps * 100 / 1000;
+    double wheelRevolutions = mps / (DT_WHEEL_DIAMETER * Math.PI);
+    double motorRev = wheelRevolutions / DT_WHEEL_DIAMETER;
+    double ticks = motorRev * 2048;
+    return ticks; 
+  }
+
   /**
    * Returns the current position of the module.
    *
@@ -163,6 +144,8 @@ public class SwerveModule {
     // Optimize the reference state to avoid spinning further than 90 degrees
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
+
+    m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
 
     // Calculate the drive output from the drive PID controller.
     // final double driveOutput =
