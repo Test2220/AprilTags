@@ -121,6 +121,13 @@ public class SwerveModule {
     return ticks; 
   }
 
+  private double angleToEncoderTicks(double angle) {
+    double angleToWheelRev = angle/ 360;
+    double motorRev = angleToWheelRev / DT_STEER_GEAR_RATIO;
+    double ticks = motorRev * 2048;
+    return ticks;
+  }
+
   /**
    * Returns the current position of the module.
    *
@@ -146,6 +153,7 @@ public class SwerveModule {
         SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
 
     m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
+    m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
 
     // Calculate the drive output from the drive PID controller.
     // final double driveOutput =
