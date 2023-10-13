@@ -151,7 +151,7 @@ public class SwerveModule {
   }
 
   private Rotation2d getAngle() {
-    return new Rotation2d(m_turningEncoder.getSelectedSensorPosition());
+    return new Rotation2d(m_turningEncoder.getPosition());
   }
 
   /**
