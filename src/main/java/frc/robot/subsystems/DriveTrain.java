@@ -13,8 +13,11 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import static edu.wpi.first.math.util.Units.inchesToMeters;
 
+import java.util.function.DoubleSupplier;
+
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.SwerveModule;
 
@@ -40,6 +43,11 @@ public class DriveTrain extends SubsystemBase {
         m_backRight.setDesiredState(swerveModuleStates[3]);
     }
 
+    public Command driveCommand(DoubleSupplier xspeed, DoubleSupplier yspeed, DoubleSupplier rot) {
+        return this.run(() -> {
+            this.drive(xspeed.getAsDouble(), yspeed.getAsDouble(), rot.getAsDouble(), false);
+        });
+    }
 
     private final SwerveModule m_frontLeft = new SwerveModule(1, 2, 0);
     private final SwerveModule m_frontRight = new SwerveModule(3, 4, 4);
