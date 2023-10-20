@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.subsystems.DriveTrain;
+import frc.twilight.swerve.devices.tunables.TunableDouble;
 
 public class SwerveModule {
   GenericEntry speed;
@@ -55,6 +56,8 @@ public class SwerveModule {
   // Steer CANcoder offset back right
   public static final double DT_BR_SE_OFFSET = 248;
 
+  
+
 
   private String name;
   /**
@@ -78,6 +81,25 @@ public class SwerveModule {
     m_turningEncoder = new PWMEncoder(turningEncoderChannelA);
     speed = Shuffleboard.getTab("swerve").add(name + " speed", 0).getEntry();
     angle = Shuffleboard.getTab("swerve").add(name + " angle", 0).getEntry();
+    SwerveModule.DT_DRIVE_P.addChangeListener((value) -> {
+      m_driveMotor.config_kP(0, value);
+    });
+    SwerveModule.DT_DRIVE_I.addChangeListener((value) -> {
+      m_driveMotor.config_kI(0, value);
+    });
+    SwerveModule.DT_DRIVE_D.addChangeListener((value) -> {
+      m_driveMotor.config_kD(0, value);
+    });
+    SwerveModule.DT_STEER_P.addChangeListener((value) -> {
+      m_turningMotor.config_kP(0, value);
+    });
+    SwerveModule.DT_STEER_I.addChangeListener((value) -> {
+      m_turningMotor.config_kI(0, value);
+    });
+    SwerveModule.DT_STEER_D.addChangeListener((value) -> {
+      m_turningMotor.config_kD(0, value);
+    });
+    
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
@@ -111,6 +133,24 @@ public class SwerveModule {
 
     return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
+
+  public static final TunableDouble DT_DRIVE_P =
+      new TunableDouble("DT_DRIVE_P", 0.1, "swerve").setSpot(0, 0);
+  public static final TunableDouble DT_DRIVE_I =
+      new TunableDouble("DT_DRIVE_I", 0, "swerve").setSpot(1, 0);
+  public static final TunableDouble DT_DRIVE_D =
+      new TunableDouble("DT_DRIVE_D", 0.2, "swerve").setSpot(2, 0);
+  public static final TunableDouble DT_DRIVE_F =
+      new TunableDouble("DT_DRIVE_F", 0.052, "swerve").setSpot(3, 0);
+
+  // PID values for the steer motor
+  public static final TunableDouble DT_STEER_P =
+      new TunableDouble("DT_STEER_P", 0.4, "swerve").setSpot(0, 1);
+  public static final TunableDouble DT_STEER_I =
+      new TunableDouble("DT_STEER_I", 0.0001, "swerve").setSpot(1, 1);
+  public static final TunableDouble DT_STEER_D =
+      new TunableDouble("DT_STEER_D", 1.274, "swerve").setSpot(2, 1);
+
 
   private double getDrivePosition() {
     double ticks = m_driveMotor.getSelectedSensorPosition();
