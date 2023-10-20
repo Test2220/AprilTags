@@ -10,9 +10,13 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import frc.robot.subsystems.DriveTrain;
 
 public class SwerveModule {
+  GenericEntry speed;
+  GenericEntry angle;
   private static final double kModuleMaxAngularVelocity = DriveTrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
@@ -51,6 +55,7 @@ public class SwerveModule {
   // Steer CANcoder offset back right
   public static final double DT_BR_SE_OFFSET = 248;
 
+
   private String name;
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
@@ -71,7 +76,8 @@ public class SwerveModule {
     m_turningMotor = new TalonFX(turningMotorChannel);
 
     m_turningEncoder = new PWMEncoder(turningEncoderChannelA);
-
+    speed = Shuffleboard.getTab("swerve").add(name + " speed", 0).getEntry();
+    angle = Shuffleboard.getTab("swerve").add(name + " angle", 0).getEntry();
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
@@ -153,7 +159,8 @@ public class SwerveModule {
     // Optimize the reference state to avoid spinning further than 90 degrees
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
-
+    speed.setDouble(state.speedMetersPerSecond);
+    angle.setDouble(state.angle.getDegrees());
     m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
     m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
 
