@@ -49,10 +49,10 @@ public class DriveTrain extends SubsystemBase {
         });
     }
 
-    private final SwerveModule m_frontLeft = new SwerveModule(1, 2, 0);
-    private final SwerveModule m_frontRight = new SwerveModule(3, 4, 4);
-    private final SwerveModule m_backLeft = new SwerveModule(5, 6, 8);
-    private final SwerveModule m_backRight = new SwerveModule(7, 8, 12);
+    private final SwerveModule m_frontLeft = new SwerveModule(12, 11, 1);
+    private final SwerveModule m_frontRight = new SwerveModule(18, 17, 2);
+    private final SwerveModule m_backLeft = new SwerveModule(16, 15, 3);
+    private final SwerveModule m_backRight = new SwerveModule(14, 13, 0);
 
     public void periodic() {
         poseEstimator.update(
