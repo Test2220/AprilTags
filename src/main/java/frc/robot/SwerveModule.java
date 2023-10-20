@@ -169,17 +169,17 @@ public class SwerveModule {
   }
 
   private double mpsToEncoderTicks(double mps) {
-    double sToMs = mps * 100 / 1000;
+    double sToMs = mps * 100.0 / 1000.0;
     double wheelRevolutions = mps / (DT_WHEEL_DIAMETER * Math.PI);
     double motorRev = wheelRevolutions / DT_WHEEL_DIAMETER;
-    double ticks = motorRev * 2048;
+    double ticks = motorRev * 2048.0;
     return ticks * sToMs; 
   }
 
   private double angleToEncoderTicks(double angle) {
-    double angleToWheelRev = angle/ 360;
+    double angleToWheelRev = angle/ 360.0;
     double motorRev = angleToWheelRev / DT_STEER_GEAR_RATIO;
-    double ticks = motorRev * 2048;
+    double ticks = motorRev * 2048.0;
     return ticks;
   }
 
