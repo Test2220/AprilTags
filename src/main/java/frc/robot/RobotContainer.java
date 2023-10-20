@@ -36,12 +36,12 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     driveTrain.setDefaultCommand(driveTrain.driveCommand(() -> {
-      m_driverController.getLeftY();      
+      return m_driverController.getLeftY();      
     }, () -> {
-      m_driverController.getLeftX();
+      return m_driverController.getLeftX();
     }, () -> {
-      m_driverController.getRightX();
-    }, false));
+      return m_driverController.getRightX();
+    }));
   }
 
   /**
