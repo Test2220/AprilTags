@@ -90,6 +90,9 @@ public class SwerveModule {
     SwerveModule.DT_DRIVE_D.addChangeListener((value) -> {
       m_driveMotor.config_kD(0, value);
     });
+    SwerveModule.DT_DRIVE_F.addChangeListener((value) -> {
+      m_driveMotor.config_kF(0, value);
+    });
     SwerveModule.DT_STEER_P.addChangeListener((value) -> {
       m_turningMotor.config_kP(0, value);
     });
@@ -98,6 +101,9 @@ public class SwerveModule {
     });
     SwerveModule.DT_STEER_D.addChangeListener((value) -> {
       m_turningMotor.config_kD(0, value);
+    });
+    SwerveModule.DT_STEER_F.addChangeListener((value) -> {
+      m_turningMotor.config_kF(0, value);
     });
     
     // Set the distance per pulse for the drive encoder. We can simply use the
@@ -150,7 +156,8 @@ public class SwerveModule {
       new TunableDouble("DT_STEER_I", 0.0001, "swerve").setSpot(1, 1);
   public static final TunableDouble DT_STEER_D =
       new TunableDouble("DT_STEER_D", 1.274, "swerve").setSpot(2, 1);
-
+  public static final TunableDouble DT_STEER_F =
+      new TunableDouble("DT_STEER_F", 0, "swerve").setSpot(3, 1);
 
   private double getDrivePosition() {
     double ticks = m_driveMotor.getSelectedSensorPosition();
