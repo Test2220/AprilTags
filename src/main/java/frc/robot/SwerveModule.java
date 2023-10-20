@@ -51,6 +51,7 @@ public class SwerveModule {
   // Steer CANcoder offset back right
   public static final double DT_BR_SE_OFFSET = 248;
 
+  private String name;
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
    *
@@ -62,9 +63,10 @@ public class SwerveModule {
    * @param turningEncoderChannelB DIO input for the turning encoder channel B
    */
   public SwerveModule(
-      int driveMotorChannel,
+      String name, int driveMotorChannel,
       int turningMotorChannel,
       int turningEncoderChannelA) {
+    this.name = name;
     m_driveMotor = new TalonFX(driveMotorChannel);
     m_turningMotor = new TalonFX(turningMotorChannel);
 
