@@ -29,12 +29,12 @@ public class SwerveModule {
 
   public static final double DT_WHEEL_DIAMETER = 0.10033;
 
-  // Drive gear ratio
+  // Drive gear ratio (that number is the number of revolutions of the motor to get one revolution of the output)
   public static final double DT_DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
   // Drive motor inverted
   public static final boolean DT_DRIVE_MOTOR_INVERTED = true;
 
-  // Steer gear ratio
+  // Steer gear ratio (that number is the number of revolutions of the steer motor to get one revolution of the output)
   public static final double DT_STEER_GEAR_RATIO = 150.0 / 7.0;
   // Steer motor inverted
   public static final boolean DT_STEER_MOTOR_INVERTED = false;
@@ -134,8 +134,8 @@ public class SwerveModule {
     double ticks = m_driveMotor.getSelectedSensorVelocity();
     double msToS = 100.0 * (1.0 / 1000.0);
     double ticksToRevolutions = 1.0 / 2048.0;
-    double revolutionsMotorToRevolutionsWheel = DT_DRIVE_GEAR_RATIO // Reduction from motor to output
-    * (1 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
+    double revolutionsMotorToRevolutionsWheel = 1.0 / DT_DRIVE_GEAR_RATIO // Reduction from motor to output
+    * (1.0 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
 
     return ticks * msToS * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
@@ -162,23 +162,23 @@ public class SwerveModule {
   private double getDrivePosition() {
     double ticks = m_driveMotor.getSelectedSensorPosition();
     double ticksToRevolutions = 1.0 / 2048.0;
-    double revolutionsMotorToRevolutionsWheel = DT_DRIVE_GEAR_RATIO // Reduction from motor to output
-    * (1 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
+    double revolutionsMotorToRevolutionsWheel = 1.0 / DT_DRIVE_GEAR_RATIO // Reduction from motor to output
+    * (1.0 / (SwerveModule.DT_WHEEL_DIAMETER * Math.PI));
 
     return ticks * ticksToRevolutions * revolutionsMotorToRevolutionsWheel;
   }
 
   private double mpsToEncoderTicks(double mps) {
     double sToMs = mps * 100.0 / 1000.0;
-    double wheelRevolutions = mps / (DT_WHEEL_DIAMETER * Math.PI);
-    double motorRev = wheelRevolutions / DT_WHEEL_DIAMETER;
+    double wheelRevolutions = sToMs / (DT_WHEEL_DIAMETER * Math.PI);
+    double motorRev = wheelRevolutions * DT_DRIVE_GEAR_RATIO;
     double ticks = motorRev * 2048.0;
-    return ticks * sToMs; 
+    return ticks; 
   }
 
   private double angleToEncoderTicks(double angle) {
-    double angleToWheelRev = angle/ 360.0;
-    double motorRev = angleToWheelRev / DT_STEER_GEAR_RATIO;
+    double angleToWheelRev = angle / 360.0;
+    double motorRev = angleToWheelRev * DT_STEER_GEAR_RATIO;
     double ticks = motorRev * 2048.0;
     return ticks;
   }
@@ -206,8 +206,8 @@ public class SwerveModule {
     // Optimize the reference state to avoid spinning further than 90 degrees
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
-    speed.setDouble(state.speedMetersPerSecond);
-    angle.setDouble(state.angle.getDegrees());
+    speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
+    angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
     m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
     m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
 
