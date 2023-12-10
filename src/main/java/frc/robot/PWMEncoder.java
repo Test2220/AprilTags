@@ -11,7 +11,7 @@ public class PWMEncoder {
     encoder.setOversampleBits(oversampling);
     }
 
-    public double getPosition() {
+    public double getPosition() { // Degrees?
      // return encoder.getAverageValue() * 360 / 4096.0 / Math.pow(2, oversampling);
         return encoder.getValue() * 360 / 4096.0;
     }

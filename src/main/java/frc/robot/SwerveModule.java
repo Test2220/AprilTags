@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -18,6 +19,9 @@ import frc.twilight.swerve.devices.tunables.TunableDouble;
 public class SwerveModule {
   GenericEntry speed;
   GenericEntry angle;
+  GenericEntry noOffsetPwmAngle;
+  GenericEntry pwmEncoderAngle;
+  GenericEntry internalEncAng;
   private static final double kModuleMaxAngularVelocity = DriveTrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
@@ -44,22 +48,11 @@ public class SwerveModule {
   // Steer encoder inverted
   public static final boolean DT_STEER_ENCODER_INVERTED = false;
 
-  // Steer CANcoder offset front left
-  public static final double DT_FL_SE_OFFSET = 277;
-
-  // Steer CANcoder offset front right
-  public static final double DT_FR_SE_OFFSET = 124;
-
-  // Steer CANcoder offset back left
-  public static final double DT_BL_SE_OFFSET = 5;
-
-  // Steer CANcoder offset back right
-  public static final double DT_BR_SE_OFFSET = 248;
-
   
 
 
   private String name;
+  private double offset;
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
    *
@@ -73,14 +66,25 @@ public class SwerveModule {
   public SwerveModule(
       String name, int driveMotorChannel,
       int turningMotorChannel,
-      int turningEncoderChannelA) {
+      int turningEncoderChannelA,
+      double offset) {
     this.name = name;
-    m_driveMotor = new TalonFX(driveMotorChannel);
-    m_turningMotor = new TalonFX(turningMotorChannel);
+    this.offset = offset;
+    this.m_turningEncoder = new PWMEncoder(turningEncoderChannelA);
 
-    m_turningEncoder = new PWMEncoder(turningEncoderChannelA);
-    speed = Shuffleboard.getTab("swerve").add(name + " speed", 0).getEntry();
-    angle = Shuffleboard.getTab("swerve").add(name + " angle", 0).getEntry();
+    m_driveMotor = new TalonFX(driveMotorChannel);
+    m_driveMotor.setSelectedSensorPosition(0);
+    m_turningMotor = new TalonFX(turningMotorChannel);
+    var ang = getAngle().getDegrees();
+    var ticks = angleToEncoderTicks(ang);
+    System.out.println(name + ": ang=" + ang + "; ticks=" + ticks);
+    m_turningMotor.setSelectedSensorPosition(ticks);
+
+    speed = Shuffleboard.getTab("swerve"+name).add("speed", 0).getEntry();
+    angle = Shuffleboard.getTab("swerve"+name).add("angle", 0).getEntry();
+    noOffsetPwmAngle = Shuffleboard.getTab("swerve"+name).add("noOffsetPwmAngle", 0).getEntry();
+    pwmEncoderAngle =  Shuffleboard.getTab("swerve"+name).add("pwmEncAng", 0).getEntry();
+    internalEncAng = Shuffleboard.getTab("swerve"+name).add("intEncAng", 0).getEntry();
     SwerveModule.DT_DRIVE_P.addChangeListener((value) -> {
       m_driveMotor.config_kP(0, value);
     });
@@ -141,23 +145,23 @@ public class SwerveModule {
   }
 
   public static final TunableDouble DT_DRIVE_P =
-      new TunableDouble("DT_DRIVE_P", 0.1, "swerve").setSpot(0, 0);
+      new TunableDouble("DT_DRIVE_P", 0.1, false, "swerve").setSpot(0, 0);
   public static final TunableDouble DT_DRIVE_I =
-      new TunableDouble("DT_DRIVE_I", 0, "swerve").setSpot(1, 0);
+      new TunableDouble("DT_DRIVE_I", 0, false, "swerve").setSpot(1, 0);
   public static final TunableDouble DT_DRIVE_D =
-      new TunableDouble("DT_DRIVE_D", 0.2, "swerve").setSpot(2, 0);
+      new TunableDouble("DT_DRIVE_D", 0.2, false, "swerve").setSpot(2, 0);
   public static final TunableDouble DT_DRIVE_F =
-      new TunableDouble("DT_DRIVE_F", 0.052, "swerve").setSpot(3, 0);
+      new TunableDouble("DT_DRIVE_F", 0.052, false, "swerve").setSpot(3, 0);
 
   // PID values for the steer motor
   public static final TunableDouble DT_STEER_P =
-      new TunableDouble("DT_STEER_P", 0.4, "swerve").setSpot(0, 1);
+      new TunableDouble("DT_STEER_P", 0.4, false, "swerve").setSpot(0, 1);
   public static final TunableDouble DT_STEER_I =
-      new TunableDouble("DT_STEER_I", 0.0001, "swerve").setSpot(1, 1);
+      new TunableDouble("DT_STEER_I", 0.0001, false, "swerve").setSpot(1, 1);
   public static final TunableDouble DT_STEER_D =
-      new TunableDouble("DT_STEER_D", 1.274, "swerve").setSpot(2, 1);
+      new TunableDouble("DT_STEER_D", 1.274, false, "swerve").setSpot(2, 1);
   public static final TunableDouble DT_STEER_F =
-      new TunableDouble("DT_STEER_F", 0, "swerve").setSpot(3, 1);
+      new TunableDouble("DT_STEER_F", 0, false, "swerve").setSpot(3, 1);
 
   private double getDrivePosition() {
     double ticks = m_driveMotor.getSelectedSensorPosition();
@@ -194,7 +198,11 @@ public class SwerveModule {
   }
 
   private Rotation2d getAngle() {
-    return new Rotation2d(m_turningEncoder.getPosition());
+    return getAngleWithoutOffset().minus(Rotation2d.fromDegrees(offset));
+  }
+
+  private Rotation2d getAngleWithoutOffset() {
+    return Rotation2d.fromDegrees(m_turningEncoder.getPosition());
   }
 
   /**
@@ -203,13 +211,22 @@ public class SwerveModule {
    * @param desiredState Desired state with speed and angle.
    */
   public void setDesiredState(SwerveModuleState desiredState) {
+    var r = Rotation2d.fromDegrees(m_turningMotor.getSelectedSensorPosition() / 2048.0 / DT_STEER_GEAR_RATIO * 360.0);
+    // var r = new Rotation2d(m_turningMotor.getSelectedSensorPosition());
+    r = Rotation2d.fromRadians(MathUtil.angleModulus(r.getRadians()));
+    internalEncAng.setDouble(r.getDegrees());
+
+    noOffsetPwmAngle.setDouble(getAngleWithoutOffset().getDegrees());
+    var pwmEncAng = getAngle();
+    pwmEncoderAngle.setDouble(pwmEncAng.getDegrees());
     // Optimize the reference state to avoid spinning further than 90 degrees
-    SwerveModuleState state =
-        SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
-    speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
-    angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
-    m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
-    m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
+    // SwerveModuleState state =
+    //     SwerveModuleState.optimize(desiredState, pwmEncAng);
+    speed.setDouble(desiredState.speedMetersPerSecond);
+    var goalAngle = desiredState.angle.getDegrees();
+    angle.setDouble(goalAngle);
+    // m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
+    // m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
 
     // Calculate the drive output from the drive PID controller.
     // final double driveOutput =
