@@ -48,11 +48,22 @@ public class DriveTrain extends SubsystemBase {
             this.drive(xspeed.getAsDouble(), yspeed.getAsDouble(), rot.getAsDouble(), false);
         });
     }
+  // Steer CANcoder offset front left
+  public static final double DT_FL_SE_OFFSET = 277;
 
-    private final SwerveModule m_frontLeft = new SwerveModule("frontleft", 12, 11, 1);
-    private final SwerveModule m_frontRight = new SwerveModule("frontright", 18, 17, 2);
-    private final SwerveModule m_backLeft = new SwerveModule("backleft", 16, 15, 3);
-    private final SwerveModule m_backRight = new SwerveModule("backright", 14, 13, 0);
+  // Steer CANcoder offset front right
+  public static final double DT_FR_SE_OFFSET = 124;
+
+  // Steer CANcoder offset back left
+  public static final double DT_BL_SE_OFFSET = 5;
+
+  // Steer CANcoder offset back right
+  public static final double DT_BR_SE_OFFSET = 248;
+
+    private final SwerveModule m_frontLeft = new SwerveModule("frontleft", 12, 11, 1, DT_FL_SE_OFFSET);
+    private final SwerveModule m_frontRight = new SwerveModule("frontright", 18, 17, 2, DT_FR_SE_OFFSET);
+    private final SwerveModule m_backLeft = new SwerveModule("backleft", 16, 15, 3, DT_BL_SE_OFFSET);
+    private final SwerveModule m_backRight = new SwerveModule("backright", 14, 13, 0, DT_BR_SE_OFFSET);
 
     public void periodic() {
         poseEstimator.update(

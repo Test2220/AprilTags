@@ -12,6 +12,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -36,11 +37,11 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     driveTrain.setDefaultCommand(driveTrain.driveCommand(() -> {
-      return m_driverController.getLeftX();      
+      return MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1);      
     }, () -> {
-      return m_driverController.getLeftY();
+      return MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1);
     }, () -> {
-      return m_driverController.getRightX();
+      return MathUtil.applyDeadband(m_driverController.getRightX(), 0.1);
     }));
   }
 

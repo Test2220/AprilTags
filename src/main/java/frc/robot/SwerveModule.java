@@ -43,23 +43,9 @@ public class SwerveModule {
   public static final double DT_STEER_ENCODER_GEAR_RATIO = 1;
   // Steer encoder inverted
   public static final boolean DT_STEER_ENCODER_INVERTED = false;
-
-  // Steer CANcoder offset front left
-  public static final double DT_FL_SE_OFFSET = 277;
-
-  // Steer CANcoder offset front right
-  public static final double DT_FR_SE_OFFSET = 124;
-
-  // Steer CANcoder offset back left
-  public static final double DT_BL_SE_OFFSET = 5;
-
-  // Steer CANcoder offset back right
-  public static final double DT_BR_SE_OFFSET = 248;
-
   
-
-
   private String name;
+  private double offset;
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
    *
@@ -73,8 +59,9 @@ public class SwerveModule {
   public SwerveModule(
       String name, int driveMotorChannel,
       int turningMotorChannel,
-      int turningEncoderChannelA) {
+      int turningEncoderChannelA, double offset) {
     this.name = name;
+    this.offset = offset;
     m_driveMotor = new TalonFX(driveMotorChannel);
     m_turningMotor = new TalonFX(turningMotorChannel);
 
@@ -226,5 +213,18 @@ public class SwerveModule {
 
     // m_driveMotor.setVoltage(driveOutput + driveFeedforward);
     // m_turningMotor.setVoltage(turnOutput + turnFeedforward);
+  }
+  public static double convertAngle(double start, double end){
+    int angleRevo = (int)(start / 360);
+    start %= 360;
+    end %= 360;
+    double change = start - end;
+    if (change > 270) {
+        end += 360;
+    } else if (change < -270) {
+        end -= 360;
+    }
+    end += 360 * angleRevo;
+    return end;
   }
 }
