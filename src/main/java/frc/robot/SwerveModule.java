@@ -106,7 +106,7 @@ public class SwerveModule {
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-    m_turningMotor.setSelectedSensorPosition(angleToEncoderTicks(getAngle().getDegrees()));
+    m_turningMotor.setSelectedSensorPosition(-angleToEncoderTicks(getAngle().getDegrees()));
   }
 
   /**
@@ -200,8 +200,8 @@ public class SwerveModule {
   public void setDesiredState(SwerveModuleState desiredState) {
 
     // Optimize the reference state to avoid spinning further than 90 degrees
-    Rotation2d rotation2d = Rotation2d.fromDegrees(steerEncoderTicksToAngle(m_turningMotor.getSelectedSensorPosition()));
-    System.out.println("endoder:" + getAngle().getDegrees() + " |  motor:" + rotation2d.getDegrees());
+    Rotation2d rotation2d = Rotation2d.fromDegrees(steerEncoderTicksToAngle(-m_turningMotor.getSelectedSensorPosition()));
+    System.out.println("endoder:" + getAngle().getDegrees() + " | motor:" + rotation2d.getDegrees() + " | " + convertAngle( rotation2d.getDegrees(), 90));
     // SwerveModuleState state =
     //     SwerveModuleState.optimize(desiredState, rotation2d);
     // speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
