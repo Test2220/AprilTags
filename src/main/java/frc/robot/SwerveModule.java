@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -105,6 +106,7 @@ public class SwerveModule {
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_turningMotor.setSelectedSensorPosition(angleToEncoderTicks(getAngle().getDegrees()));
   }
 
   /**
@@ -169,7 +171,12 @@ public class SwerveModule {
     double ticks = motorRev * 2048.0;
     return ticks;
   }
-
+  private double steerEncoderTicksToAngle(double ticks) {
+    double motorRotation = ticks / 2048;
+    double moduleRotation = motorRotation / DT_STEER_GEAR_RATIO;
+    double angle = moduleRotation * 360;
+    return angle;
+  }
   /**
    * Returns the current position of the module.
    *
@@ -181,7 +188,8 @@ public class SwerveModule {
   }
 
   private Rotation2d getAngle() {
-    return new Rotation2d(m_turningEncoder.getPosition());
+    var rAngle = Rotation2d.fromDegrees(m_turningEncoder.getPosition() - offset);
+    return Rotation2d.fromDegrees(MathUtil.inputModulus(rAngle.getDegrees(), 0, 360));
   }
 
   /**
@@ -190,13 +198,16 @@ public class SwerveModule {
    * @param desiredState Desired state with speed and angle.
    */
   public void setDesiredState(SwerveModuleState desiredState) {
+
     // Optimize the reference state to avoid spinning further than 90 degrees
-    SwerveModuleState state =
-        SwerveModuleState.optimize(desiredState, new Rotation2d(m_turningMotor.getSelectedSensorPosition()));
-    speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
-    angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
-    m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
-    m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
+    Rotation2d rotation2d = Rotation2d.fromDegrees(steerEncoderTicksToAngle(m_turningMotor.getSelectedSensorPosition()));
+    System.out.println("endoder:" + getAngle().getDegrees() + " |  motor:" + rotation2d.getDegrees());
+    // SwerveModuleState state =
+    //     SwerveModuleState.optimize(desiredState, rotation2d);
+    // speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
+    // angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
+    // m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
+    // m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()));
 
     // Calculate the drive output from the drive PID controller.
     // final double driveOutput =
