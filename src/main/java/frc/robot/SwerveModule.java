@@ -204,7 +204,7 @@ public class SwerveModule {
     // System.out.println("endoder:" + getAngle().getDegrees() + " | motor:" + rotation2d.getDegrees() + " | " + convertAngle( rotation2d.getDegrees(), 90));
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, rotation2d);
-        System.out.println(String.format("joystick:%.2f ", state.angle.getDegrees()) + String.format(" motor: %.2f ", rotation2d.getDegrees()) + String.format(" output: %.2f", convertAngle(rotation2d.getDegrees(), state.angle.getDegrees())));
+        // System.out.println(String.format("joystick:%.2f ", state.angle.getDegrees()) + String.format(" motor: %.2f ", rotation2d.getDegrees()) + String.format(" output: %.2f", convertAngle(rotation2d.getDegrees(), state.angle.getDegrees())));
         // speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
     // angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
     // m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
