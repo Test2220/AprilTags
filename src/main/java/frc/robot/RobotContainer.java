@@ -39,7 +39,7 @@ public class RobotContainer {
     driveTrain.setDefaultCommand(driveTrain.driveCommand(() -> {
       return MathUtil.applyDeadband(m_driverController.getLeftX(), 0.1);      
     }, () -> {
-      return MathUtil.applyDeadband(m_driverController.getLeftY(), 0.1);
+      return MathUtil.applyDeadband(m_driverController.getLeftY() * -1, 0.1);
     }, () -> {
       return MathUtil.applyDeadband(m_driverController.getRightX(), 0.1);
     }));
