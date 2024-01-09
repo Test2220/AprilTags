@@ -203,12 +203,12 @@ public class SwerveModule {
     Rotation2d rotation2d = Rotation2d.fromDegrees(steerEncoderTicksToAngle(-m_turningMotor.getSelectedSensorPosition()));
     // System.out.println("endoder:" + getAngle().getDegrees() + " | motor:" + rotation2d.getDegrees() + " | " + convertAngle( rotation2d.getDegrees(), 90));
     SwerveModuleState state =
-        SwerveModuleState.optimize(desiredState, getAngle());
-        System.out.println("joystick: " + state.angle.getDegrees() + " motor: " + getAngle().getDegrees());
+        SwerveModuleState.optimize(desiredState, rotation2d);
+        System.out.println(String.format("joystick:%.2f ", state.angle.getDegrees()) + String.format(" motor: %.2f ", rotation2d.getDegrees()) + String.format(" output: %.2f", convertAngle(rotation2d.getDegrees(), state.angle.getDegrees())));
         // speed.setDouble(mpsToEncoderTicks(state.speedMetersPerSecond));
     // angle.setDouble(angleToEncoderTicks(state.angle.getDegrees()));
     // m_driveMotor.set(TalonFXControlMode.Velocity, mpsToEncoderTicks(state.speedMetersPerSecond));
-    m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(state.angle.getDegrees()) * -1);
+    m_turningMotor.set(TalonFXControlMode.Position, angleToEncoderTicks(convertAngle(rotation2d.getDegrees(), state.angle.getDegrees()) * -1));
 
     // Calculate the drive output from the drive PID controller.
     // final double driveOutput =
