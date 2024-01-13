@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
@@ -61,27 +62,28 @@ public class DriveTrain extends SubsystemBase {
 
     public Command zeroCommand() {
         return this.runOnce(() -> {
+            navx.reset();
 poseEstimator.resetPosition(getGyroscopeRotation(), getModulePositions() ,new Pose2d());
         });
     }
 
     public Command driveCommand(DoubleSupplier xspeed, DoubleSupplier yspeed, DoubleSupplier rot) {
         return this.run(() -> {
-            this.drive(xspeed.getAsDouble(), yspeed.getAsDouble(), rot.getAsDouble(), false);
+            this.drive(xspeed.getAsDouble(), yspeed.getAsDouble(), rot.getAsDouble(), true);
         });
     }
-
+    
     // Steer CANcoder offset front left
-    public static final double DT_FL_SE_OFFSET = 67.09;
+    public static final double DT_FL_SE_OFFSET = 155.302734375 - 90;
 
     // Steer CANcoder offset front right
-    public static final double DT_FR_SE_OFFSET = 39.09;
+    public static final double DT_FR_SE_OFFSET = 124.98046875 - 90;
 
     // Steer CANcoder offset back left
-    public static final double DT_BL_SE_OFFSET = 276.48;
+    public static final double DT_BL_SE_OFFSET = 8.96484375 - 90;
 
     // Steer CANcoder offset back right
-    public static final double DT_BR_SE_OFFSET = 154.29;
+    public static final double DT_BR_SE_OFFSET = 247.5 - 90;
 
     private final SwerveModule m_frontLeft = new SwerveModule("frontleft", 12, 11, 1, DT_FL_SE_OFFSET);
     private final SwerveModule m_frontRight = new SwerveModule("frontright", 18, 17, 2, DT_FR_SE_OFFSET);
@@ -146,4 +148,13 @@ poseEstimator.resetPosition(getGyroscopeRotation(), getModulePositions() ,new Po
             new Pose2d(),
             stateStdDevs,
             visionMeasurementStdDevs);
+
+    public Command xcommand() {
+        return this.runOnce(() -> {
+        m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
+        m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+        m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-135)));
+        m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+        });
+    }
 }

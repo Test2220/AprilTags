@@ -60,6 +60,7 @@ public class RobotContainer {
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
     m_driverController.a().onTrue(driveTrain.zeroCommand());  
+    m_driverController.x().onTrue((driveTrain.xcommand()));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.

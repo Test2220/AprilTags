@@ -19,6 +19,7 @@ import frc.twilight.swerve.devices.tunables.TunableDouble;
 public class SwerveModule {
   GenericEntry speed;
   GenericEntry angle;
+  GenericEntry drivePositionEntry;
   private static final double kModuleMaxAngularVelocity = DriveTrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
@@ -69,6 +70,8 @@ public class SwerveModule {
     m_turningEncoder = new PWMEncoder(turningEncoderChannelA);
     speed = Shuffleboard.getTab("swerve").add(name + " speed", 0).getEntry();
     angle = Shuffleboard.getTab("swerve").add(name + " angle", 0).getEntry();
+    drivePositionEntry  = Shuffleboard.getTab("swerve").add(name + " drivePostion", 0).getEntry();
+    Shuffleboard.getTab("swerve").addDouble(name + "encoder", m_turningEncoder::getPosition);
     SwerveModule.DT_DRIVE_P.addChangeListener((value) -> {
       m_driveMotor.config_kP(0, value);
     });
@@ -198,7 +201,7 @@ public class SwerveModule {
    * @param desiredState Desired state with speed and angle.
    */
   public void setDesiredState(SwerveModuleState desiredState) {
-
+drivePositionEntry.setDouble(getDrivePosition());
 
     Rotation2d rotation2d = Rotation2d.fromDegrees(steerEncoderTicksToAngle(-m_turningMotor.getSelectedSensorPosition()));
     // System.out.println("endoder:" + getAngle().getDegrees() + " | motor:" + rotation2d.getDegrees() + " | " + convertAngle( rotation2d.getDegrees(), 90));
