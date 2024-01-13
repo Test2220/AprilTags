@@ -42,6 +42,7 @@ public class RobotContainer {
       return MathUtil.applyDeadband(m_driverController.getLeftY() * -1, 0.1);
     }, () -> {
       return MathUtil.applyDeadband(m_driverController.getRightX(), 0.1);
+
     }));
   }
 
@@ -58,6 +59,7 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` F to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
+    m_driverController.a().onTrue(driveTrain.zeroCommand());  
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
