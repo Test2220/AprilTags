@@ -150,10 +150,10 @@ poseEstimator.resetPosition(getGyroscopeRotation(), getModulePositions() ,new Po
             visionMeasurementStdDevs);
 
     public Command xcommand() {
-        return this.runOnce(() -> {
-        m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
+        return this.run(() -> {
+        m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-135)));
         m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-        m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-135)));
+        m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
         m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
         });
     }
